@@ -256,16 +256,10 @@ func (w *Writer) Reopen(file string) error {
 		}
 	}
 
-	if err := os.Rename(w.absPath, file); err != nil {
-		return err
-	}
-	newfile, err := os.OpenFile(w.absPath, DefaultFileFlag, DefaultFileMode)
+	oldfile, err := w.reopen(file)
 	if err != nil {
 		return err
 	}
-
-	// swap the unsafe pointer
-	oldfile := atomic.SwapPointer((*unsafe.Pointer)(unsafe.Pointer(&w.file)), unsafe.Pointer(newfile))
 
 	go func() {
 		defer (*os.File)(oldfile).Close()
